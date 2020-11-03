@@ -1,0 +1,244 @@
+<html>
+    <head>
+        <script type="text/javascript" src="d3.v5.min.js"></script>
+    </head>
+    <body>
+
+    </body>
+
+    <script type="text/javascript">
+        var w = 900;
+        var h = 400;
+        var barPadding = 1;
+        var monthPadding = 10;
+
+       
+
+        
+
+        d3.csv("cases.csv").then(function(data) {
+        console.log(data);
+
+        
+       
+
+        
+
+        var informationNeeded = []
+
+        var august = []
+        var september = []
+        var october = []
+
+        var total_average_newCases_August = []
+        var total_average_IH_August = []
+        var total_average_ICUH_August = []
+
+        var total_average_newCases_September = []
+        var total_average_IH_September = []
+        var total_average_ICUH_September = []
+
+        var total_average_newCases_October = []
+        var total_average_IH_October = []
+        var total_average_ICUH_October = []
+
+        
+
+        for(var i=0;i<data.length;i=i+13){
+            
+
+            var newCases = []
+            var InpatientHospitalizations = []
+            var ICUHospitalizations = []
+
+            
+
+            for(var y=i;y<i+13;y++){
+                
+                newCases.push(parseInt(data[y]["New Cases"]))
+                InpatientHospitalizations.push(parseInt(data[y]["Inpatient Hospitalizations"]))
+                ICUHospitalizations.push(parseInt(data[y]["ICU Hospitalizations"]))
+            }
+
+
+            var average_newCases = d3.sum(newCases)/13
+            var average_InpatientHospitalizations = d3.sum(InpatientHospitalizations)/13
+            var average_ICUHospitalizations = d3.sum(ICUHospitalizations)/13
+            
+
+            if(data[i]["Date"].slice(5,7) == "08"){
+                total_average_newCases_August.push(average_newCases)
+                total_average_IH_August.push(average_InpatientHospitalizations)
+                total_average_ICUH_August.push(average_ICUHospitalizations)
+
+            }
+            else if (data[i]["Date"].slice(5,7) == "09"){
+                total_average_newCases_September.push(average_newCases)
+                total_average_IH_September.push(average_InpatientHospitalizations)
+                total_average_ICUH_September.push(average_ICUHospitalizations)
+
+            }
+            else{
+                total_average_newCases_October.push(average_newCases)
+                total_average_IH_October.push(average_InpatientHospitalizations)
+                total_average_ICUH_October.push(average_ICUHospitalizations)
+            }
+            
+
+        }
+
+        august.push(d3.sum(total_average_newCases_August)/total_average_newCases_August.length)
+        august.push(d3.sum(total_average_IH_August)/total_average_IH_August.length)
+        august.push(d3.sum(total_average_ICUH_August)/total_average_ICUH_August.length)
+
+
+        september.push(d3.sum(total_average_newCases_September)/total_average_newCases_September.length)
+        september.push(d3.sum(total_average_IH_September)/total_average_IH_September.length)
+        september.push(d3.sum(total_average_ICUH_September)/total_average_ICUH_September.length)
+
+
+        october.push(d3.sum(total_average_newCases_October)/total_average_newCases_October.length)
+        october.push(d3.sum(total_average_IH_October)/total_average_IH_October.length)
+        october.push(d3.sum(total_average_ICUH_October)/total_average_ICUH_October.length)
+
+        console.log(august)
+        console.log(september)
+        console.log(october)
+
+        informationNeeded.push(august)
+        informationNeeded.push(september)
+        informationNeeded.push(october)
+
+
+        var svg = d3.select('body')
+                    .append('svg')
+                    .attr('width', w)
+                    .attr('height', h)
+
+
+
+
+        var x_axis_scale = d3.scaleBand()
+                                .domain(['August', 'September','October' ])
+                                .range([0,w])
+        
+        var x_axis = svg.append('g')
+                            .call(d3.axisBottom(x_axis_scale))
+                            .attr('transform','translate(0,'+ (h-45) +')')
+        
+        var x_axis_label = svg.append('text')
+                                .attr('transform', 'translate(430,100)')
+                                .attr('text-anchor', 'middle')
+                                .text('Green Bars : Average ICUHospitalizations         Orange Bars : Average New Cases          Yellow Bars : Average Inpatient Hospitalizations')
+                        
+
+
+        var y_axis_scale = d3.scaleLinear()
+                                .domain([2.0,0.0])
+                                .range([0,200])
+        
+        var y_axis = svg.append('g')
+                            .call(d3.axisLeft(y_axis_scale))
+                            .attr('transform','translate('+(w-870)+','+ (h-250) +')')
+                            
+
+
+
+        var rectangles = svg.selectAll('.bar.field1')
+                            .data(august)
+                            .enter()
+                            .append('rect')
+                            .attr('x', function(a, i){
+                                return i * ((w/4)/august.length)+50;
+                            })
+                            .attr('y', function(a){
+                                return h-50 - (a*100)
+                            })
+                            .attr('width', ((w/4)/august.length) - barPadding)
+                            .attr('height', function(a){
+                                return a*100   
+                            })  
+                            .attr('fill',function(a){
+                                if (a==august[0]){
+                                    return "#FF8C00"
+                                }
+                                else if (a==august[1]){
+                                    return "#CCCC00"
+                                }
+                                else{
+                                    return "#008000"
+                                }
+                            });
+
+
+        var rectangles2 = svg.selectAll('.bar.field1')
+                            .data(september)
+                            .enter()
+                            .append('rect')
+                            .attr('x', function(s, i){
+                                return i * ((w/4)/september.length)+350;
+                            })
+                            .attr('y', function(s){
+                                return h -50- (s*100)
+                            })
+                            .attr('width', ((w/4)/september.length) - barPadding)
+                            .attr('height', function(s){
+                                return s*100   
+                            })  
+                            .attr('fill',function(s){
+                                if (s==september[0]){
+                                    return "#FF8C00"
+                                }
+                                else if (s==september[1]){
+                                    return "#CCCC00"
+                                }
+                                else{
+                                    return "#008000"
+                                }
+                            });
+
+        var rectangles3 = svg.selectAll('.bar.field1')
+                            .data(october)
+                            .enter()
+                            .append('rect')
+                            .attr('x', function(o, i){
+                                return i * ((w/4)/october.length)+650;
+                            })
+                            .attr('y', function(o){
+                                return h -50- (o*100)
+                            })
+                            .attr('width', ((w/4)/october.length) - barPadding)
+                            .attr('height', function(o){
+                                return o*100   
+                            })  
+                            .attr('fill',function(o){
+                                if (o==october[0]){
+                                    return "#FF8C00"
+                                }
+                                else if (o==october[1]){
+                                    return "#CCCC00"
+                                }
+                                else{
+                                    return "#008000"
+                                }
+                            });
+
+
+
+
+        });
+
+       
+
+
+
+        
+
+        
+
+
+
+    </script>
+
+
+</html>
